@@ -94,14 +94,13 @@ define('./simple', function (require, exports, module) {
                 } else {
                     var data = context[$.expando];
                     if (data) {
-                        this.uid = data;
+                        this.uid = data.uid;
                         this.cache = data;
                     } else {
-                        data = context[$.expando] = {
-                            uid: ++$.guid + ''
+                        this.uid = ++$.guid + ''
+                        this.cache = context[$.expando] = {
+                            uid: this.uid
                         };
-                        this.cache = data;
-
                     }
                 }
             }
@@ -111,7 +110,7 @@ define('./simple', function (require, exports, module) {
                  * @param {String} key
                  */
                 get: function (key) {
-                    return cache[this.uid][key];
+                    return this.cache[key];
                 },
 
                 /**
@@ -120,7 +119,7 @@ define('./simple', function (require, exports, module) {
                  * @param {Any} value
                  */
                 set: function (key, value) {
-                    cache[this.uid][key] = value;
+                    this.cache[key] = value;
                     return this;
                 },
                 /**
@@ -129,7 +128,7 @@ define('./simple', function (require, exports, module) {
                  * @returns value
                  */
                 remove: function (key) {
-                    var obj = cache[this.uid], v;
+                    var obj = this.cache, v;
                     if (key in obj) {
                         v = obj[key];
                         obj[key] = null;
@@ -141,8 +140,20 @@ define('./simple', function (require, exports, module) {
                  * clear
                  */
                 clear: function () {
-                    cache[this.uid] = null;
-                    delete cache[this.uid];
+                    if (!this.cache.uid) {
+                        cache[this.uid] = null;
+                        delete cache[this.uid];
+                    }
+                },
+                /**
+                 * empty
+                 */
+                empty: function () {
+                    var is = true, i;
+                    for (i in this.cache) {
+                        is = false;
+                    }
+                    if (is) this.clear();
                 }
             });
             return function (context) {
@@ -394,6 +405,7 @@ define('./simple.touch', ['./simple'], function (require, exports, module) {
                     $.e.remove(aEle, 'touchmove', tmp);
                 (tmp = data.remove('_' + type + data.uid + 'n' + hid + 'e')) &&
                     $.e.remove(aEle, 'touchend', tmp);
+                data.empty();
             });
         }
     }
