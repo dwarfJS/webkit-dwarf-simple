@@ -295,9 +295,7 @@ define('./simple', function (require, exports, module) {
             eles.forEach(function (ele) {
                 classNames.split(' ').forEach(function(cn){
                     if(!supported){
-                        if(!hasClass(ele, cn)){
-                            ele.className = ele.className.replace(classNameRegExp(cn), ' ');
-                        }
+                        ele.className = ele.className.replace(classNameRegExp(cn), ' ');
                     }else{
                         ele.classList.remove(cn);
                     }
