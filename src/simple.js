@@ -39,9 +39,9 @@ define('./simple', function (require, exports, module) {
          */
         toArray: function (arr) {
             var res = [], i, l;
-            if (!arr) {
+            if (arr) {
                 try {
-                    res.slice.call(arr);
+                    res = res.slice.call(arr);
                 } catch (e) {
                     res = [];
                     for (i = 0, l = arr.length; i < l; i++) {
@@ -64,13 +64,12 @@ define('./simple', function (require, exports, module) {
          * @param {String} id
          */
         id: function (id) {
-            var ele = doc.getElementById(id);
-            return ele ? [ele] : [];
+            return doc.getElementById(id);
         }
     });
 
     $.extend($, {
-        expando: 'Simple' + Math.random().replace(/\D/g, ''),
+        expando: 'Simple' + (Math.random() + '').replace(/\D/g, ''),
         guid: 0,
         /**
          * data
@@ -82,7 +81,7 @@ define('./simple', function (require, exports, module) {
                 rmultiDash = /([A-Z])/g;
             function Data(context) {
                 if (context.nodeType && context.nodeType === 1) {
-                    var name = 'data-' + $.expando.replace(rmultiDash, '-$1').toLowerCase(),
+                    var name = 'data' + $.expando.replace(rmultiDash, '-$1').toLowerCase(),
                         guid = context.getAttribute(name);
                     if (guid) {
                         this.uid = guid + '';
@@ -94,6 +93,7 @@ define('./simple', function (require, exports, module) {
                     this.uid = context[$.expando] || ++$.guid + '';
                     context[$.expando] = this.uid;
                 }
+                cache[this.uid] = cache[this.uid] || {};
             }
             $.extend(Data.prototype, {
                 /**
@@ -163,7 +163,9 @@ define('./simple', function (require, exports, module) {
      * @class
      * @static
      */
-    $.http = {
+    $.http = {}
+
+    $.extend($.http, {
         getXHR: function () {
             return new XMLHttpRequest();
         },
@@ -222,7 +224,7 @@ define('./simple', function (require, exports, module) {
             var s = doc.createElement('img');
             s.src = url;    
         }
-    }
+    });
 
     $.get = $.http.get;
     $.post = $.http.post;
@@ -260,23 +262,116 @@ define('./simple', function (require, exports, module) {
             eles.forEach(function (ele) {
                 ele.removeEventListener(event, handler, false);
             });
+        }
+    };
+
+    /**
+     * css
+     * @static
+     * @class
+     */
+    $.css = {
+        addClass: function (eles, className) {
+            eles = $(eles);
+            eles.forEach(function (ele) {
+                ele.classList.add(className);
+            });
+        },
+        removeClass: function (eles, className) {
+            eles = $(eles);
+            eles.forEach(function (ele) {
+                ele.classList.remove(className);
+            });
+        },
+        hasClass: function (eles, className) {
+            eles = $(eles);
+            return eles[0] && eles[0].classList.contains(className);
+        }
+    };
+
+    return module.exports = $;
+});
+
+define('./simple.touch', ['./simple'], function (require, exports, module) {
+    var $ = require('./simple');
+    /**
+     * touch
+     * @class
+     * @static
+     */
+    var touch = {
+        /**
+         * getDist
+         * @param {Position} p1
+         * @param {Position} p2
+         */
+        getDist: function (p1, p2) {
+            if (!p1 || !p2) return 0;
+            return Math.sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
         },
         /**
-         * tap
+         * getTouchPos
+         * @param {TouchEvent} e
+         * @returns {Position}
+         */
+        getTouchPos: function (e) {
+            var t = e.touches[0];
+            return { x: t.clientX, y: t.clientY };
+        },
+        /**
+         * bind
+         * @private
+         */
+        _bind: function (eles, handler, type, startEvtHandler, moveEvtHandler, endEvtHandler) {
+            eles = $(eles);
+            $.e.add(eles, 'touchstart', startEvtHandler);
+            $.e.add(eles, 'touchmove', moveEvtHandler);
+            $.e.add(eles, 'touchend', endEvtHandler);
+            var hid = $.data(handler).uid;
+            eles.forEach(function (ele) {
+                var data = $.data(ele);
+                data.set('_' + type + data.uid + 'n' + hid + 's', startEvtHandler)
+                    .set('_' + type + data.uid + 'n' + hid + 'm', moveEvtHandler)
+                    .set('_' + type + data.uid + 'n' + hid + 'e', endEvtHandler);
+            });
+        },
+        /**
+         * unbind
+         * @private
+         */
+        _unbind: function (eles, handler, type) {
+            eles = $(eles);
+            var hid = $.data(handler).uid;
+            eles.forEach(function (ele) {
+                var data = $.data(ele), aEle = [ele], tmp;
+                (tmp = data.remove('_' + type + data.uid + 'n' + hid + 's')) &&
+                    $.e.remove(aEle, 'touchstart', tmp);
+                (tmp = data.remove('_' + type + data.uid + 'n' + hid + 'm')) &&
+                    $.e.remove(aEle, 'touchmove', tmp);
+                (tmp = data.remove('_' + type + data.uid + 'n' + hid + 'e')) &&
+                    $.e.remove(aEle, 'touchend', tmp);
+            });
+        }
+    }
+
+    return module.exports = touch;
+});
+
+define('./simple.tap', ['./simple', './simple.touch'], function (require, exports, module) {
+    var $ = require('./simple'),
+        touch = require('./simple.touch');
+    var tap = {
+        /**
+         * on
          * @param {DOMArray} eles
          * @param {Function} handler
          */
-        tap: (function () { 
+        on: (function () { 
             var TAP_DISTANCE = 20,
                 DOUBLE_TAP_TIME = 300;
-            function getTouchPos(e) {
-                var t = e.touches[0];
-                return { x: t.clientX, y: t.clientY };
-            }
-            function getDist(p1, p2) {
-                if (!p1 || !p2) return 0;
-                return Math.sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
-            }
+            var getTouchPos = touch.getTouchPos,
+                getDist = touch.getDist;
+
             return function (eles, handler) {
                 var pt_pos,
                     ct_pos,
@@ -311,62 +406,17 @@ define('./simple', function (require, exports, module) {
                         pt_up_time = now;
                     }
                 }
-                eles = $(eles);
-                $.e.add(eles, 'touchstart', startEvtHandler);
-                $.e.add(eles, 'touchmove', moveEvtHandler);
-                $.e.add(eles, 'touchend', endEvtHandler);
-                var hid = $.data(hData).uid;
-                eles.forEach(function (ele) {
-                    var data = $.data(ele);
-                    data.set('tap' + data.uid + hid + 's', startEvtHandler)
-                        .set('tap' + data.uid + hid + 'm', moveEvtHandler)
-                        .set('tap' + data.uid + hid + 'e', endEvtHandler);
-                });
+                return touch._bind(eles, handler, 'tap', startEvtHandler, moveEvtHandler, endEvtHandler);
             };
         })(),
         /**
-         * untap
+         * off
          * @param {DOMArray} eles
          * @param {Function} handler
          */
-        untap: function (eles, handler) {
-            eles = $(eles);
-            var hid = $.data(hData).uid;
-            eles.forEach(function (ele) {
-                var data = $.data(ele), aEle = [ele], tmp;
-                (tmp = data.remove('tap' + data.uid + hid + 's')) &&
-                    $.e.remove(aEle, 'touchstart', tmp);
-                (tmp = data.remove('tap' + data.uid + hid + 'm')) &&
-                    $.e.remove(aEle, 'touchmove', tmp);
-                (tmp = data.remove('tap' + data.uid + hid + 'e')) &&
-                    $.e.remove(aEle, 'touchend', tmp);
-            });
+        off: function (eles, handler) {
+            return touch._unbind(eles, handler, 'tap');
         }
-    };
-
-    /**
-     * css
-     * @static
-     * @class
-     */
-    $.css = {
-        addClass: function (eles, className) {
-            eles = $(eles);
-            eles.forEach(function (ele) {
-                ele.classList.add(className);
-            });
-        },
-        removeClass: function (eles, className) {
-            eles = $(eles);
-            eles.forEach(function (ele) {
-                ele.classList.remove(className);
-            });
-        },
-        hasClass: function (eles, className) {
-            eles = $(eles);
-            return eles[0] && eles[0].classList.contains(className);
-        }
-    };
-
-    return module.exports = $;
+    }
+    return module.exports = tap;
 });
