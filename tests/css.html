@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+<div id="has-class" class="has-class"></div>
+<div id="has-class-2" class="aa a b has-class"></div>
+<div id="not-has-class" class=""></div>
+<script src="dwarf.min.js"></script>
+<script>
+    require(['../src/simple'], function () {
+        var $ = require('../src/simple');
+        console.log($.css.hasClass($('#has-class'), 'has-class') === true);
+        console.log($.css.hasClass($('#has-class-2'), 'has-class') === true);
+        console.log($.css.hasClass($('#not-has-class'), 'has-class') === false);
+
+        $.css.addClass($('#not-has-class'), 'has-class');
+        console.log($.css.hasClass($('#not-has-class'), 'has-class') === true);
+        $.css.addClass($('#not-has-class'), 'has-class-1 has-class-2');
+        console.log($.css.hasClass($('#not-has-class'), 'has-class-2') === true);
+
+
+        $.css.removeClass($('#not-has-class'), 'has-class');
+        console.log($.css.hasClass($('#not-has-class'), 'has-class') === false);
+        $.css.removeClass($('#not-has-class'), 'has-class-1 has-class-2');
+        console.log($.css.hasClass($('#not-has-class'), 'has-class-2') === false);
+    })
+</script>
+</body>
+</html>
