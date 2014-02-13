@@ -1,7 +1,5 @@
 require(['../src/simple'], function () {
     var $ = require('../src/simple');
-    mocha.setup('bdd');
-    var expect = chai.expect;
 
     describe('css', function(){
 
@@ -37,7 +35,7 @@ require(['../src/simple'], function () {
             });
         });
     });
+    // mocha.checkLeaks();
+    // mocha.run();
 
-    mocha.checkLeaks();
-    mocha.run();
 });

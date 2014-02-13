@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<meta charset="utf-8">
     <title></title>
-    <link rel="stylesheet" href="node_modules/mocha/mocha.css"/>
+    <link rel="stylesheet" href="css/mocha.css"/>
 </head>
 <body>
 
@@ -10,13 +11,22 @@
 <div id="has-class" class="has-class"></div>
 <div id="has-class-2" class="aa a b has-class"></div>
 <div id="not-has-class" class=""></div>
-
 <div id="mocha"></div>
 
 <script src="js/dwarf.min.js"></script>
-
-<script src="node_modules/mocha/mocha.js"></script>
+<script src="js/mocha.js"></script>
 <script src="js/chai.js"></script>
-<script src="js/tests.js"></script>
+<script>
+	mocha.ui('bdd');
+	mocha.reporter('html');
+	expect = chai.expect;
+</script>
+<script src="cases/css.js"></script>
+<script>
+	setTimeout(function () {
+		if (window.mochaPhantomJS) { mochaPhantomJS.run(); }
+		else { mocha.run(); }
+	}, 100);
+</script>
 </body>
 </html>

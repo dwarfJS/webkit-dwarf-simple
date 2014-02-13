@@ -1,7 +1,0 @@
-{
-    "name": "application-name",
-    "version": "0.0.1",
-    "devDependencies": {
-        "mocha": "~1.17.1"
-    }
-}
