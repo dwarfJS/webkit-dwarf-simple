@@ -270,24 +270,53 @@ define('./simple', function (require, exports, module) {
      * @static
      * @class
      */
-    $.css = {
-        addClass: function (eles, className) {
-            eles = $(eles);
-            eles.forEach(function (ele) {
-                ele.classList.add(className);
-            });
-        },
-        removeClass: function (eles, className) {
-            eles = $(eles);
-            eles.forEach(function (ele) {
-                ele.classList.remove(className);
-            });
-        },
-        hasClass: function (eles, className) {
-            eles = $(eles);
-            return eles[0] && eles[0].classList.contains(className);
+    $.css = function(){
+        var supported = !!document.body.classList;
+        function classNameRegExp(className){
+            return new RegExp('(^|\\s+)'+className+'(\\s+|$)', 'g');
         }
-    };
+
+        function addClass(eles, classNames) {
+            eles = $(eles);
+            eles.forEach(function (ele) {
+                classNames.split(' ').forEach(function(cn){
+                    if(!supported){
+                        if(!hasClass(ele, cn)){
+                            ele.className += ' '+cn;
+                        }
+                    }else{
+                        ele.classList.add(cn);
+                    }
+                });
+            });
+        }
+        function removeClass(eles, classNames) {
+            eles = $(eles);
+            eles.forEach(function (ele) {
+                classNames.split(' ').forEach(function(cn){
+                    if(!supported){
+                        if(!hasClass(ele, cn)){
+                            ele.className = ele.className.replace(classNameRegExp(cn), ' ');
+                        }
+                    }else{
+                        ele.classList.remove(cn);
+                    }
+                });
+            });
+        }
+        function hasClass(eles, className) {
+            eles = $(eles);
+            return eles[0] &&
+                (!supported?
+                    eles[0].className.search(classNameRegExp(className))!=-1:
+                    eles[0].classList.contains(className));
+        }
+        return {
+            addClass: addClass,
+            removeClass: removeClass,
+            hasClass: hasClass
+        }
+    }();
 
     return module.exports = $;
 });

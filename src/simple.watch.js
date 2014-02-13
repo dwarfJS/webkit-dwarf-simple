@@ -20,7 +20,7 @@ define('./simple.watch', ['./simple'], function (require, exports, module) {
             try {
                 Object.prototype.__defineGetter__.call(obj, propName, getter);
                 Object.prototype.__defineSetter__.call(obj, propName, setter);
-            } cache (e) {
+            } catch (e) {
                 return false;
             }
         }
