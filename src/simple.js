@@ -143,7 +143,6 @@ define('./simple', function (require, exports, module) {
                 clear: function () {
                     cache[this.uid] = null;
                     delete cache[this.uid];
-                    console.log(cache);
                 }
             });
             return function (context) {
@@ -297,12 +296,12 @@ define('./simple', function (require, exports, module) {
         function addClass(eles, classNames) {
             eles = $(eles);
             eles.forEach(function (ele) {
-                classNames.split(' ').forEach(function(cn){
-                    if(!supported){
-                        if(!hasClass(ele, cn)){
-                            ele.className += ' '+cn;
+                classNames.split(' ').forEach(function (cn) {
+                    if (!supported) {
+                        if (!hasClass(ele, cn)) {
+                            ele.className += ' ' + cn;
                         }
-                    }else{
+                    } else {
                         ele.classList.add(cn);
                     }
                 });
@@ -311,10 +310,10 @@ define('./simple', function (require, exports, module) {
         function removeClass(eles, classNames) {
             eles = $(eles);
             eles.forEach(function (ele) {
-                classNames.split(' ').forEach(function(cn){
-                    if(!supported){
+                classNames.split(' ').forEach(function (cn) {
+                    if (!supported) {
                         ele.className = ele.className.replace(classNameRegExp(cn), ' ');
-                    }else{
+                    } else {
                         ele.classList.remove(cn);
                     }
                 });
@@ -324,7 +323,7 @@ define('./simple', function (require, exports, module) {
             eles = $(eles);
             return eles[0] &&
                 (!supported?
-                    eles[0].className.search(classNameRegExp(className))!=-1:
+                    eles[0].className.search(classNameRegExp(className)) != -1 :
                     eles[0].classList.contains(className));
         }
         return {
