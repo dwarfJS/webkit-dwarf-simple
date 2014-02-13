@@ -298,22 +298,16 @@ define('./simple', function (require, exports, module) {
      * @static
      * @class
      */
-    $.css = function(){
-        var supported = !!document.body.classList;
-        function classNameRegExp(className){
+    $.css = function () {
+        function classNameRegExp(className) {
             return new RegExp('(^|\\s+)'+className+'(\\s+|$)', 'g');
         }
-
         function addClass(eles, classNames) {
             eles = $(eles);
             eles.forEach(function (ele) {
                 classNames.split(' ').forEach(function (cn) {
-                    if (!supported) {
-                        if (!hasClass(ele, cn)) {
-                            ele.className += ' ' + cn;
-                        }
-                    } else {
-                        ele.classList.add(cn);
+                    if (!hasClass(ele, cn)) {
+                        ele.className += ' ' + cn;
                     }
                 });
             });
@@ -322,26 +316,19 @@ define('./simple', function (require, exports, module) {
             eles = $(eles);
             eles.forEach(function (ele) {
                 classNames.split(' ').forEach(function (cn) {
-                    if (!supported) {
-                        ele.className = ele.className.replace(classNameRegExp(cn), ' ');
-                    } else {
-                        ele.classList.remove(cn);
-                    }
+                    ele.className = ele.className.replace(classNameRegExp(cn), ' ');
                 });
             });
         }
         function hasClass(eles, className) {
             eles = $(eles);
-            return eles[0] &&
-                (!supported?
-                    eles[0].className.search(classNameRegExp(className)) != -1 :
-                    eles[0].classList.contains(className));
+            return eles[0] && eles[0].className.search(classNameRegExp(className)) !== -1;
         }
         return {
             addClass: addClass,
             removeClass: removeClass,
             hasClass: hasClass
-        }
+        };
     }();
 
     return module.exports = $;
