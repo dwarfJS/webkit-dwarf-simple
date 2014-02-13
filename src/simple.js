@@ -89,11 +89,21 @@ define('./simple', function (require, exports, module) {
                         this.uid = ++$.guid + '';
                         context.setAttribute(name, this.uid);
                     }
+                    cache[this.uid] = cache[this.uid] || {};
+                    this.cache = cache[this.uid];
                 } else {
-                    this.uid = context[$.expando] || ++$.guid + '';
-                    context[$.expando] = this.uid;
+                    var data = context[$.expando];
+                    if (data) {
+                        this.uid = data;
+                        this.cache = data;
+                    } else {
+                        data = context[$.expando] = {
+                            uid: ++$.guid + ''
+                        };
+                        this.cache = data;
+
+                    }
                 }
-                cache[this.uid] = cache[this.uid] || {};
             }
             $.extend(Data.prototype, {
                 /**
@@ -126,6 +136,14 @@ define('./simple', function (require, exports, module) {
                         delete obj[key];
                     }
                     return v;
+                },
+                /**
+                 * clear
+                 */
+                clear: function () {
+                    cache[this.uid] = null;
+                    delete cache[this.uid];
+                    console.log(cache);
                 }
             });
             return function (context) {
