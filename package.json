@@ -8,7 +8,8 @@
   "dependencies": {},
   "devDependencies": {
     "grunt": "*",
-    "grunt-mocha-phantomjs": "~0.4.0"
+    "grunt-mocha-phantomjs": "~0.4.0",
+    "grunt-contrib-concat": "~0.3.0"
   },
   "scripts": {
     "test": "grunt report"

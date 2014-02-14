@@ -14,12 +14,22 @@ module.exports = function( grunt ) {
 		},
 		build: {
 			all: ['src/*.js']
+		},
+		concat: {
+			options: {
+				separator: ';',
+			},
+			dist: {
+				src: ['dist/simple.js', 'dist/simple.touch.js', 'dist/simple.tap.js'],
+				dest: 'all/simple.js',
+			}
 		}
 	});
 
 	grunt.loadTasks('tasks');
 	grunt.loadNpmTasks('grunt-mocha-phantomjs');
+	grunt.loadNpmTasks('grunt-contrib-concat');
 
-	grunt.registerTask('default', ['build', 'mocha_phantomjs:all']);
+	grunt.registerTask('default', ['build', 'concat', 'mocha_phantomjs:all']);
 	grunt.registerTask('report', ['build', 'mocha_phantomjs:report'])
 };
