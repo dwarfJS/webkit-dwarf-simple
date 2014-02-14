@@ -3,7 +3,7 @@
  * @author donaldyang
  */
 
-define('./simple.swipe', ['./simple'], function (require, exports, module) {
+define(function (require, exports, module) {
     'use strict';
     var $ = require('./simple'),
         touch = require('./simple.touch'),

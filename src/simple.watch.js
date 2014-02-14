@@ -3,7 +3,7 @@
  * @author donaldyang
  */
 
-define('./simple.watch', ['./simple'], function (require, exports, module) {
+define(function (require, exports, module) {
     'use strict';
 
     var $ = require('./simple');

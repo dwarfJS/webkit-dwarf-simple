@@ -11,11 +11,15 @@ module.exports = function( grunt ) {
 				}
 			},
 			all: ['tests/*.html']
+		},
+		build: {
+			all: ['src/*.js']
 		}
 	});
 
+	grunt.loadTasks('tasks');
 	grunt.loadNpmTasks('grunt-mocha-phantomjs');
 
-	grunt.registerTask('default', ['mocha_phantomjs:all']);
-	grunt.registerTask('report', ['mocha_phantomjs:report'])
+	grunt.registerTask('default', ['build', 'mocha_phantomjs:all']);
+	grunt.registerTask('report', ['build', 'mocha_phantomjs:report'])
 };
