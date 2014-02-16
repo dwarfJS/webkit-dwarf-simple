@@ -51,13 +51,6 @@ define(function (require, exports, module) {
             }
             return res;
         },
-        /**
-         * isArray
-         * @param {Any} arr
-         */
-        isArray: function (arr) {
-            return Object.prototype.toString.call(arr) === '[object Array]';
-        },
 
         /**
          * id
@@ -144,6 +137,7 @@ define(function (require, exports, module) {
                         cache[this.uid] = null;
                         delete cache[this.uid];
                     }
+                    // do something next?
                 },
                 /**
                  * empty
@@ -152,6 +146,7 @@ define(function (require, exports, module) {
                     var is = true, i;
                     for (i in this.cache) {
                         is = false;
+                        break;
                     }
                     if (is) this.clear();
                 }

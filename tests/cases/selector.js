@@ -9,10 +9,7 @@ require(['../dist/simple'], function () {
 
         describe('#toArray', function () {
             it('should return array', function () {
-                console.log($.toArray({
-                    '1': 'test1',
-                    '2': 'test2'
-                }));
+                expect($.toArray(document.getElementsByTagName('div')) instanceof Array).to.equal(true);
             });
         });
 
