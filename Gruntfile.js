@@ -17,7 +17,7 @@ module.exports = function( grunt ) {
 		},
 		concat: {
 			options: {
-				separator: ';',
+				separator: '\n',
 			},
 			dist: {
 				src: ['dist/simple.js', 'dist/simple.touch.js', 'dist/simple.tap.js'],

@@ -7,7 +7,8 @@ define(function (require, exports, module) {
     'use strict';
 
     var doc = document,
-        win = window;
+        win = window,
+        rnotwhite = /\S+/g;
 
     /**
      * $
@@ -194,14 +195,14 @@ define(function (require, exports, module) {
         },
         data: $.data($.http),
         setXHRToCache: function (xhrObj) {
-            $.http.data.set('xhr_' + (++$.guid), xhrObj);
+            $.http.data.set('_xhr_' + (++$.guid), xhrObj);
             return $.guid;
         },
         getXHRFromCache: function (id) {
-            return $.http.data.get('xhr_' + id);
+            return $.http.data.get('_xhr_' + id);
         },
         clearXHRInCache: function (id) {
-            $.http.data.remove('xhr_' + id);
+            $.http.data.remove('_xhr_' + id);
         },
         ajax: function (url, para, cb, method, type) {
             var xhr = $.http.getXHR(), xhrId;
@@ -295,12 +296,12 @@ define(function (require, exports, module) {
      */
     $.css = function () {
         function classNameRegExp(className) {
-            return new RegExp('(^|\\s+)'+className+'(\\s+|$)', 'g');
+            return new RegExp('(^|\\s+)' + className + '(\\s+|$)', 'g');
         }
         function addClass(eles, classNames) {
             eles = $(eles);
             eles.forEach(function (ele) {
-                classNames.split(' ').forEach(function (cn) {
+                classNames.match(rnotwhite).forEach(function (cn) {
                     if (!hasClass(ele, cn)) {
                         ele.className += ' ' + cn;
                     }
@@ -310,7 +311,7 @@ define(function (require, exports, module) {
         function removeClass(eles, classNames) {
             eles = $(eles);
             eles.forEach(function (ele) {
-                classNames.split(' ').forEach(function (cn) {
+                classNames.match(rnotwhite).forEach(function (cn) {
                     ele.className = ele.className.replace(classNameRegExp(cn), ' ');
                 });
             });
