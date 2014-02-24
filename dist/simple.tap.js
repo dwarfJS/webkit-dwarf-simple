@@ -31,7 +31,6 @@ define('./simple.tap', ['./simple','./simple.touch'], function (require, exports
                     }
                 }
                 function moveEvtHandler(e) {
-                    e.preventDefault();
                     ct_pos = getTouchPos(e);
                 }
                 function endEvtHandler(e) {

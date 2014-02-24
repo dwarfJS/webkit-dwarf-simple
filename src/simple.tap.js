@@ -31,7 +31,6 @@ define(function (require, exports, module) {
                     }
                 }
                 function moveEvtHandler(e) {
-                    e.preventDefault();
                     ct_pos = getTouchPos(e);
                 }
                 function endEvtHandler(e) {
