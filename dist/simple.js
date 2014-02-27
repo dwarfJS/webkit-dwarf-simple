@@ -19,7 +19,9 @@ define('./simple', function (require, exports, module) {
         context = context || doc;
         return typeof selector === 'string' ? 
             $.toArray(context.querySelectorAll(selector)) : 
-            selector;
+                Array.isArray(selector) ?
+                    selector : 
+                        (selector && selector.nodeType === 1) ? [selector] : [];
     };
     /**
      * extend

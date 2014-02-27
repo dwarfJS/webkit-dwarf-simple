@@ -19,7 +19,9 @@ define('./simple', function (require, exports, module) {
         context = context || doc;
         return typeof selector === 'string' ? 
             $.toArray(context.querySelectorAll(selector)) : 
-            selector;
+                Array.isArray(selector) ?
+                    selector : 
+                        (selector && selector.nodeType === 1) ? [selector] : [];
     };
     /**
      * extend
@@ -432,7 +434,6 @@ define('./simple.tap', ['./simple','./simple.touch'], function (require, exports
                     }
                 }
                 function moveEvtHandler(e) {
-                    e.preventDefault();
                     ct_pos = getTouchPos(e);
                 }
                 function endEvtHandler(e) {
