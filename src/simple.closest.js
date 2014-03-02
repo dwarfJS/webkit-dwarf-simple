@@ -8,7 +8,11 @@ define(function (require, exports, module) {
 
     var $ = require('./simple');
 
-    var de = document.documentElement, 
+    var de = document.documentElement,
+        /**
+         * http://caniuse.com/#feat=matchesselector
+         * "matches" DOM Selector API will be used in the future
+         */ 
         match = de.webkitMatchesSelector || de.matchesSelector;
 
     function _matchElement(selector, refElement) {
