@@ -31,5 +31,6 @@ module.exports = function( grunt ) {
 	grunt.loadNpmTasks('grunt-contrib-concat');
 
 	grunt.registerTask('default', ['build', 'concat', 'mocha_phantomjs:all']);
-	grunt.registerTask('report', ['build', 'mocha_phantomjs:report'])
+	grunt.registerTask('$', ['build', 'make']);
+	grunt.registerTask('report', ['build', 'mocha_phantomjs:report']);
 };
