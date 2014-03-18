@@ -4,7 +4,8 @@
  */
 
 define(function (require, exports, module) {
-    var $ = require('./simple');
+    var $ = require('./simple'),
+        Data = require('./simple.data');
     /**
      * touch
      * @class
@@ -38,9 +39,9 @@ define(function (require, exports, module) {
             $.e.add(eles, 'touchstart', startEvtHandler);
             $.e.add(eles, 'touchmove', moveEvtHandler);
             $.e.add(eles, 'touchend', endEvtHandler);
-            var hid = $.data(handler).uid;
+            var hid = Data(handler).uid;
             eles.forEach(function (ele) {
-                var data = $.data(ele);
+                var data = Data(ele);
                 data.set('_' + type + data.uid + 'n' + hid + 's', startEvtHandler)
                     .set('_' + type + data.uid + 'n' + hid + 'm', moveEvtHandler)
                     .set('_' + type + data.uid + 'n' + hid + 'e', endEvtHandler);
@@ -52,9 +53,9 @@ define(function (require, exports, module) {
          */
         _unbind: function (eles, handler, type) {
             eles = $(eles);
-            var hid = $.data(handler).uid;
+            var hid = Data(handler).uid;
             eles.forEach(function (ele) {
-                var data = $.data(ele), aEle = [ele], tmp;
+                var data = Data(ele), aEle = [ele], tmp;
                 (tmp = data.remove('_' + type + data.uid + 'n' + hid + 's')) &&
                     $.e.remove(aEle, 'touchstart', tmp);
                 (tmp = data.remove('_' + type + data.uid + 'n' + hid + 'm')) &&

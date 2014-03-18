@@ -61,103 +61,10 @@ define('./simple', function (require, exports, module) {
          */
         id: function (id) {
             return doc.getElementById(id);
-        }
-    });
-
-    $.extend($, {
+        },
+        
         expando: 'Simple' + (Math.random() + '').replace(/\D/g, ''),
-        guid: 0,
-        /**
-         * data
-         * @param {Element | Object} context
-         * @returns Data
-         */
-        data: (function () {
-            var cache = {},
-                rmultiDash = /([A-Z])/g;
-            function Data(context) {
-                if (context.nodeType && context.nodeType === 1) {
-                    var name = 'data' + $.expando.replace(rmultiDash, '-$1').toLowerCase(),
-                        guid = context.getAttribute(name);
-                    if (guid) {
-                        this.uid = guid + '';
-                    } else {
-                        this.uid = ++$.guid + '';
-                        context.setAttribute(name, this.uid);
-                    }
-                    cache[this.uid] = cache[this.uid] || {};
-                    this.cache = cache[this.uid];
-                } else {
-                    var data = context[$.expando];
-                    if (data) {
-                        this.uid = data.uid;
-                        this.cache = data;
-                    } else {
-                        this.uid = ++$.guid + ''
-                        this.cache = context[$.expando] = {
-                            uid: this.uid
-                        };
-                    }
-                }
-            }
-            $.extend(Data.prototype, {
-                /**
-                 * get
-                 * @param {String} key
-                 */
-                get: function (key) {
-                    return this.cache[key];
-                },
-
-                /**
-                 * set
-                 * @param {String} key
-                 * @param {Any} value
-                 */
-                set: function (key, value) {
-                    this.cache[key] = value;
-                    return this;
-                },
-                /**
-                 * remove
-                 * @param {String} key
-                 * @returns value
-                 */
-                remove: function (key) {
-                    var obj = this.cache, v;
-                    if (key in obj) {
-                        v = obj[key];
-                        obj[key] = null;
-                        delete obj[key];
-                    }
-                    return v;
-                },
-                /**
-                 * clear
-                 */
-                clear: function () {
-                    if (!this.cache.uid) {
-                        cache[this.uid] = null;
-                        delete cache[this.uid];
-                    }
-                    // do something next?
-                },
-                /**
-                 * empty
-                 */
-                empty: function () {
-                    var is = true, i;
-                    for (i in this.cache) {
-                        is = false;
-                        break;
-                    }
-                    if (is) this.clear();
-                }
-            });
-            return function (context) {
-                return new Data(context);
-            };
-        })()
+        guid: 0
     });
 
     /**
@@ -189,27 +96,10 @@ define('./simple', function (require, exports, module) {
      * @class
      * @static
      */
-    $.http = {}
-
-    $.extend($.http, {
-        getXHR: function () {
-            return new XMLHttpRequest();
-        },
-        data: $.data($.http),
-        setXHRToCache: function (xhrObj) {
-            $.http.data.set('_xhr_' + (++$.guid), xhrObj);
-            return $.guid;
-        },
-        getXHRFromCache: function (id) {
-            return $.http.data.get('_xhr_' + id);
-        },
-        clearXHRInCache: function (id) {
-            $.http.data.remove('_xhr_' + id);
-        },
-        ajax: function (url, para, cb, method, type) {
-            var xhr = $.http.getXHR(), xhrId;
+    $.http = function () {
+        function ajax(url, para, cb, method, type) {
+            var xhr = new XMLHttpRequest();
             xhr.open(method, url, true);
-            xhrId = $.http.setXHRToCache(xhr);
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4) {
                     if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304 || xhr.status === 1223 || xhr.status === 0) {
@@ -221,36 +111,42 @@ define('./simple', function (require, exports, module) {
                     } else {
                         cb({ec: xhr.status});
                     }
-                    $.http.clearXHRInCache(xhrId);
                     xhr = null;
                 }            
             }
-            xhr.send(para);            
-            return xhrId;
-        },
-        post: function (url, para, cb, type) {
-            var s = '', i;
-            for (i in para) {
-                s += '&' + i + '=' + para[i]; 
-            }
-            return $.http.ajax(url, s, cb, 'POST', type);
-        },
-        get: function (url, para, cb, type) {
-            var params = [];
-            for (var i in para) {
-                params.push(i + '=' + para[i]);
-            }
-            if (url.indexOf('?') === -1) {
-                url += '?';   
-            }
-            url += params.join('&');
-            return $.http.ajax(url, null, cb, 'GET', type);
-        },
-        preload: function (url) {
-            var s = doc.createElement('img');
-            s.src = url;    
+            xhr.send(para);
+            return xhr;
         }
-    });
+
+        function _encode(para) {
+            var i, arr = [];
+            for (i in para) {
+                arr.push(i + '=' + para[i]);
+            }
+            return arr.join('&');
+        }
+
+        function post(url, para, cb, type) {
+            return ajax(url, _encode(para), cb, 'POST', type);
+        }
+
+        function get(url, para, cb, type) {
+            url.indexOf('?') === -1 && (url += '?');
+            return ajax(url + _encode(para), null, cb, 'GET', type);
+        }
+
+        function preload(url) {
+            var s = doc.createElement('img');
+            s.src = url;
+        }
+
+        return {
+            ajax: ajax,
+            get: get,
+            post: post,
+            preload: preload
+        }
+    }();
 
     $.get = $.http.get;
     $.post = $.http.post;
@@ -331,13 +227,103 @@ define('./simple', function (require, exports, module) {
 
     return module.exports = $;
 });
+define('./simple.data', ['./simple'], function (require, exports, module) {
+    var $ = require('./simple');
+    return module.exports = (function () {
+        var cache = {},
+            rmultiDash = /([A-Z])/g;
+        function Data(context) {
+            if (context.nodeType && context.nodeType === 1) {
+                var name = 'data' + $.expando.replace(rmultiDash, '-$1').toLowerCase(),
+                    guid = context.getAttribute(name);
+                if (guid) {
+                    this.uid = guid + '';
+                } else {
+                    this.uid = ++$.guid + '';
+                    context.setAttribute(name, this.uid);
+                }
+                cache[this.uid] = cache[this.uid] || {};
+                this.cache = cache[this.uid];
+            } else {
+                var data = context[$.expando];
+                if (data) {
+                    this.uid = data.uid;
+                    this.cache = data;
+                } else {
+                    this.uid = ++$.guid + ''
+                    this.cache = context[$.expando] = {
+                        uid: this.uid
+                    };
+                }
+            }
+        }
+        $.extend(Data.prototype, {
+            /**
+             * get
+             * @param {String} key
+             */
+            get: function (key) {
+                return this.cache[key];
+            },
+
+            /**
+             * set
+             * @param {String} key
+             * @param {Any} value
+             */
+            set: function (key, value) {
+                this.cache[key] = value;
+                return this;
+            },
+            /**
+             * remove
+             * @param {String} key
+             * @returns value
+             */
+            remove: function (key) {
+                var obj = this.cache, v;
+                if (key in obj) {
+                    v = obj[key];
+                    obj[key] = null;
+                    delete obj[key];
+                }
+                return v;
+            },
+            /**
+             * clear
+             */
+            clear: function () {
+                if (!this.cache.uid) {
+                    cache[this.uid] = null;
+                    delete cache[this.uid];
+                }
+                // do something next?
+            },
+            /**
+             * empty
+             */
+            empty: function () {
+                var is = true, i;
+                for (i in this.cache) {
+                    is = false;
+                    break;
+                }
+                if (is) this.clear();
+            }
+        });
+        return function (context) {
+            return new Data(context);
+        };
+    })();
+});
 /*!
  * webkit-dwarf-simple-touch
  * @author donaldyang
  */
 
-define('./simple.touch', ['./simple'], function (require, exports, module) {
-    var $ = require('./simple');
+define('./simple.touch', ['./simple','./simple.data'], function (require, exports, module) {
+    var $ = require('./simple'),
+        Data = require('./simple.data');
     /**
      * touch
      * @class
@@ -371,9 +357,9 @@ define('./simple.touch', ['./simple'], function (require, exports, module) {
             $.e.add(eles, 'touchstart', startEvtHandler);
             $.e.add(eles, 'touchmove', moveEvtHandler);
             $.e.add(eles, 'touchend', endEvtHandler);
-            var hid = $.data(handler).uid;
+            var hid = Data(handler).uid;
             eles.forEach(function (ele) {
-                var data = $.data(ele);
+                var data = Data(ele);
                 data.set('_' + type + data.uid + 'n' + hid + 's', startEvtHandler)
                     .set('_' + type + data.uid + 'n' + hid + 'm', moveEvtHandler)
                     .set('_' + type + data.uid + 'n' + hid + 'e', endEvtHandler);
@@ -385,9 +371,9 @@ define('./simple.touch', ['./simple'], function (require, exports, module) {
          */
         _unbind: function (eles, handler, type) {
             eles = $(eles);
-            var hid = $.data(handler).uid;
+            var hid = Data(handler).uid;
             eles.forEach(function (ele) {
-                var data = $.data(ele), aEle = [ele], tmp;
+                var data = Data(ele), aEle = [ele], tmp;
                 (tmp = data.remove('_' + type + data.uid + 'n' + hid + 's')) &&
                     $.e.remove(aEle, 'touchstart', tmp);
                 (tmp = data.remove('_' + type + data.uid + 'n' + hid + 'm')) &&

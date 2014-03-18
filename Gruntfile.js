@@ -20,7 +20,7 @@ module.exports = function( grunt ) {
 				separator: '\n',
 			},
 			dist: {
-				src: ['dist/simple.js', 'dist/simple.touch.js', 'dist/simple.tap.js'],
+				src: ['dist/simple.js', 'dist/simple.data.js', 'dist/simple.touch.js', 'dist/simple.tap.js'],
 				dest: 'all/simple.js',
 			}
 		}

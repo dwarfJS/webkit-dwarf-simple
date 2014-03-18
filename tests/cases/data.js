@@ -1,5 +1,5 @@
-require(['../dist/simple'], function () {
-    var $ = require('../dist/simple'),
+require(['../dist/simple.data'], function () {
+    var Data = require('../dist/simple.data'),
         obj = {};
 
     describe('data', function () {
@@ -10,13 +10,13 @@ require(['../dist/simple'], function () {
 
         describe('#cache', function () {
             it('should able to get the same cache', function () {
-                expect($.data(obj).cache).to.equal($.data(obj).cache);
+                expect(Data(obj).cache).to.equal(Data(obj).cache);
             });
         })
 
         describe('#set() & get()', function () {
             it('should able to set and get data', function () {
-                var data = $.data(obj);
+                var data = Data(obj);
                 data.set('test', 'test');
                 expect(data.get('test')).to.equal('test');
             });
@@ -24,7 +24,7 @@ require(['../dist/simple'], function () {
 
         describe('#remove()', function () {
             it('should able to remove a data', function () {
-                var data = $.data(obj);
+                var data = Data(obj);
                 data.set('test', 'test');
                 expect(data.remove('test')).to.equal('test');
                 expect(data.get('test')).to.equal(undefined);
