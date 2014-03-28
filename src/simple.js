@@ -25,11 +25,13 @@ define(function (require, exports, module) {
      * @param {Object} dest
      * @param {Object} src
      */
-    $.extend = function (dest, src) {
-        var n;
-        for (n in src) {
-            if (src.hasOwnProperty(n)) dest[n] = src[n];
-        }
+    $.extend = function (dest) {
+        var n, srcs = arguemnts.slice(1);
+        srcs.forEach(function (src) {
+            for (n in src) {
+                if (src.hasOwnProperty(n)) dest[n] = src[n];
+            }
+        });
         return dest;
     }
     $.extend($, {
