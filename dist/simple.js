@@ -29,10 +29,12 @@ define('./simple', function (require, exports, module) {
      * @param {Object} src
      */
     $.extend = function (dest, src) {
-        var n;
-        for (n in src) {
-            if (src.hasOwnProperty(n)) dest[n] = src[n];
-        }
+        var n, srcs = [].slice.call(arguments, 1);
+        srcs.forEach(function (src) {
+            for (n in src) {
+                if (src.hasOwnProperty(n)) dest[n] = src[n];
+            }
+        });
         return dest;
     }
     $.extend($, {
