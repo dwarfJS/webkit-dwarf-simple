@@ -12,29 +12,57 @@ define(function (require, exports, module) {
 
     /**
      * $
-     * @param {String | Element} selector
+     * @param {String | DOMArray} selector
+     * @param {DOM} context
      */
-    var $ = function (selector) {
-        return typeof selector === 'string' ?
-            doc.getElementById(selector) :
-                (selector && selector.nodeType === 1) ?
-                    selector : null;
+    var $ = function (selector, context) {
+        context = context || doc;
+        return typeof selector === 'string' ? 
+            $.toArray(context.querySelectorAll(selector)) : 
+                Array.isArray(selector) ?
+                    selector : 
+                        (selector && selector.nodeType === 1) ? [selector] : [];
     };
     /**
      * extend
      * @param {Object} dest
      * @param {Object} src
      */
-    $.extend = function (dest) {
-        var n, srcs = arguemnts.slice(1);
-        srcs.forEach(function (src) {
-            for (n in src) {
-                if (src.hasOwnProperty(n)) dest[n] = src[n];
-            }
-        });
+    $.extend = function (dest, src) {
+        var n;
+        for (n in src) {
+            if (src.hasOwnProperty(n)) dest[n] = src[n];
+        }
         return dest;
     }
     $.extend($, {
+        /**
+         * toArray
+         * @param {ArrayLikeObject} arr
+         */
+        toArray: function (arr) {
+            var res = [], i, l;
+            if (arr) {
+                try {
+                    res = res.slice.call(arr);
+                } catch (e) {
+                    res = [];
+                    for (i = 0, l = arr.length; i < l; i++) {
+                        res[i] = arr[i];
+                    }
+                }
+            }
+            return res;
+        },
+
+        /**
+         * id
+         * @param {String} id
+         */
+        id: function (id) {
+            return doc.getElementById(id);
+        },
+        
         expando: 'Simple' + (Math.random() + '').replace(/\D/g, ''),
         guid: 0
     });
@@ -60,13 +88,6 @@ define(function (require, exports, module) {
             var expire = new Date(); 
             expire.setTime(expire.getTime() + (hour ? 3600000 * hour : 30 * 24 * 60 * 60 * 1000));
             doc.cookie = name + '=' + value + '; ' + 'expires=' + expire.toGMTString() + '; path=' + (path ? path : '/') + '; ' + (domain ? ('domain=' + domain + ';') : ''); 
-        },
-
-        /**
-         * del
-         */
-        del: function () {
-            document.cookie = name + '=; expires=Mon, 26 Jul 1997 05:00:00 GMT; path=' + (path ? path : '/') + ';' + (domain ? ('domain=' + domain + ';') : ''); 
         }
     };
 
@@ -114,10 +135,16 @@ define(function (require, exports, module) {
             return ajax(url + _encode(para), null, cb, 'GET', type);
         }
 
+        function preload(url) {
+            var s = doc.createElement('img');
+            s.src = url;
+        }
+
         return {
             ajax: ajax,
             get: get,
-            post: post
+            post: post,
+            preload: preload
         }
     }();
 
@@ -146,13 +173,17 @@ define(function (require, exports, module) {
      * @static
      */
     $.e = {
-        add: function (ele, event, handler) {
-            ele = $(ele);
-            ele && ele.addEventListener(event, handler, false);
+        add: function (eles, event, handler) {
+            eles = $(eles);
+            eles.forEach(function (ele) {
+                ele.addEventListener(event, handler, false);
+            });
         },
         remove: function (eles, event, handler) {
-            ele = $(ele);
-            ele && ele.removeEventListener(event, handler, false);
+            eles = $(eles);
+            eles.forEach(function (ele) {
+                ele.removeEventListener(event, handler, false);
+            });
         }
     };
 
@@ -165,23 +196,27 @@ define(function (require, exports, module) {
         function classNameRegExp(className) {
             return new RegExp('(^|\\s+)' + className + '(\\s+|$)', 'g');
         }
-        function addClass(ele, classNames) {
-            ele = $(ele);
-            ele && classNames.match(rnotwhite).forEach(function (cn) {
-                if (!hasClass(ele, cn)) {
-                    ele.className += ' ' + cn;
-                }
+        function addClass(eles, classNames) {
+            eles = $(eles);
+            eles.forEach(function (ele) {
+                classNames.match(rnotwhite).forEach(function (cn) {
+                    if (!hasClass(ele, cn)) {
+                        ele.className += ' ' + cn;
+                    }
+                });
             });
         }
-        function removeClass(ele, classNames) {
-            ele = $(ele);
-            ele && classNames.match(rnotwhite).forEach(function (cn) {
-                ele.className = ele.className.replace(classNameRegExp(cn), ' ');
+        function removeClass(eles, classNames) {
+            eles = $(eles);
+            eles.forEach(function (ele) {
+                classNames.match(rnotwhite).forEach(function (cn) {
+                    ele.className = ele.className.replace(classNameRegExp(cn), ' ');
+                });
             });
         }
-        function hasClass(ele, className) {
-            ele = $(ele);
-            return ele && ele.className.search(classNameRegExp(className)) !== -1;
+        function hasClass(eles, className) {
+            eles = $(eles);
+            return eles[0] && eles[0].className.search(classNameRegExp(className)) !== -1;
         }
         return {
             addClass: addClass,
